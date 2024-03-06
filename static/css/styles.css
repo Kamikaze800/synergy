@@ -34,7 +34,7 @@ ul.mainmenu li {
 ul.mainmenu li.last {float: right;}
 
 ul.mainmenu li a {
-	color: #fdc073;
+	color: red;
 	text-decoration: none;
 }
 ul.mainmenu li a:hover {
