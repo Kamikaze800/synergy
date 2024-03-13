@@ -8,7 +8,7 @@
 {% for p in posts %}
 <li>
 <p class="title"><a href="{{ url_for('showPost', alias=p.url)}}">{{p.title}}</a></p>
-<p class="annonce">{{ p.text[:50] | striptags  }}</p>
+<p class="annonce">{{ p.text[:50] | striptags }}</p>
 </li>
 {% endfor %}
 </ul>
