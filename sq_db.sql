@@ -19,5 +19,8 @@ CREATE TABLE IF NOT EXISTS users
     email  text    NOT NULL,
     psw    text    NOT NULL,
     avatar BLOB DEFAULT NULL,
-    time   integer NOT NULL
+    time integer NOT NULL,
+    fullname text NOT NULL,
+    gender text NOT NULL,
+    place text NOT NULL
 );

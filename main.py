@@ -14,7 +14,7 @@ MAX_CONTENT_LENGTH = 1024 * 1024
 
 app = Flask(__name__)
 app.config.from_object(__name__)
-app.config.update(dict(DATABASE=os.path.join(app.root_path,'flsite.db')))
+app.config.update(dict(DATABASE=os.path.join(app.root_path, 'flsite.db')))
 
 login_manager = LoginManager(app)
 login_manager.login_view = 'login'
@@ -33,6 +33,7 @@ def connect_db():
     conn.row_factory = sqlite3.Row
     return conn
 
+
 def create_db():
     """Вспомогательная функция для создания таблиц БД"""
     db = connect_db()
@@ -40,6 +41,10 @@ def create_db():
         db.cursor().executescript(f.read())
     db.commit()
     db.close()
+
+
+create_db()
+
 
 def get_db():
     '''Соединение с БД, если оно еще не установлено'''
@@ -49,6 +54,8 @@ def get_db():
 
 
 dbase = None
+
+
 @app.before_request
 def before_request():
     """Установление соединения с БД перед выполнением запроса"""
@@ -68,19 +75,20 @@ def close_db(error):
 def index():
     return render_template('index.html', menu=dbase.getMenu(), posts=dbase.getPostsAnonce())
 
+
 @app.route("/add_post", methods=["POST", "GET"])
 def addPost():
     if request.method == "POST":
         if len(request.form['name']) > 4 and len(request.form['post']) > 10:
             res = dbase.addPost(request.form['name'], request.form['post'], request.form['url'])
             if not res:
-                flash('Ошибка добавления статьи', category = 'error')
+                flash('Ошибка добавления статьи', category='error')
             else:
                 flash('Статья добавлена успешно', category='success')
         else:
             flash('Ошибка добавления статьи', category='error')
 
-    return render_template('add_post.html', menu = dbase.getMenu(), title="Добавление статьи")
+    return render_template('add_post.html', menu=dbase.getMenu(), title="Добавление статьи")
 
 
 @app.route("/post/<alias>")
@@ -91,6 +99,7 @@ def showPost(alias):
         abort(404)
 
     return render_template('post.html', menu=dbase.getMenu(), title=title, post=post)
+
 
 @app.route("/login", methods=["POST", "GET"])
 def login():
@@ -114,7 +123,7 @@ def login():
 def register():
     if request.method == "POST":
         if len(request.form['name']) > 1 and len(request.form['email']) > 1 \
-            and len(request.form['psw']) > 1 and request.form['psw'] == request.form['psw2']:
+                and len(request.form['psw']) > 1 and request.form['psw'] == request.form['psw2']:
             hash = generate_password_hash(request.form['psw'])
             res = dbase.addUser(request.form['name'], request.form['email'], hash)
             if res:
@@ -135,6 +144,7 @@ def logout():
     flash("Вы вышли из аккаунта", "success")
     return redirect(url_for('login'))
 
+
 @app.route('/profile')
 @login_required
 def profile():
@@ -151,6 +161,7 @@ def userava():
     h = make_response(img)
     h.headers['Content-Type'] = 'image/png'
     return h
+
 
 @app.route('/upload', methods=["POST", "GET"])
 @login_required
@@ -170,6 +181,7 @@ def upload():
             flash("Ошибка обновления аватара", "error")
 
     return redirect(url_for('profile'))
+
 
 if __name__ == "__main__":
     app.run(debug=True)
