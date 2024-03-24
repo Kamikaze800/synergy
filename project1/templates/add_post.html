@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+
+{% block content %}
+{{ super() }}
+{% for cat, msg in get_flashed_messages(True) %}
+<div class="flash {{cat}}">{{msg}}</div>
+{% endfor %}
+<form action='{{url_for("addPost")}}' method='post' class='form-contact'>
+    <p><label for="about">Заголовок анкеты, можете указать предпочтения в работе (больше 5 символов)</label></p>
+    <p><textarea class="form-control" cols="30" rows="1" name="title"></textarea></p>
+    <p><label for="about">Немного о себе (больше 10 символов)</label></p>
+    <p><textarea class="form-control" id="about" cols="30" rows="3" name="post"></textarea></p>
+    <p><label for="about">Введите место обучения (необязательно)</label></p>
+    <p><input class="form-control" placeholder="Вводить сюда" name="place"></p>
+    <p><label for="about">Остальные обязательные данные будут взяты автоматически из вашего аккаунта</label></p>
+    <p><input type="submit" value="Добавить"></p>
+</form>
+{% endblock %}

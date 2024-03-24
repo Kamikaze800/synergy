@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+
+{% block content %}
+{{ super() }}
+{{ post | safe }}
+<form>
+    <p><label>_______________________________________________________________</label></p>
+    <p><label></label></p>
+    <p><li>Имя на сайте: {{current_user.getName()}}</li></p>
+    <p><li>Полное имя: {{current_user.get_fullname()}}</li></p>
+    <p><li>Пол: {{current_user.get_gender()}}</li></p>
+    <p><li>Email для связи: {{current_user.getEmail()}}</li></p>
+    {% if place != 'place' %}
+    <div>
+        <p><label>Обучаюсь, обучение проходит по адресу: {{  place  }}</label></p>
+        <p><img src="/static/img/map.png" alt="здесь должна была быть картинка, но не нашлась"></p>
+    </div>
+    {% else %}
+    <div><p><label>Не обучаюсь</label></p></div>
+    {% endif %}
+</form>
+{% endblock %}
