@@ -1,5 +1,6 @@
 import sqlite3
 import os
+import requests
 from flask import Flask, render_template, request, g, flash, abort, redirect, url_for, make_response
 from FDataBase import FDataBase
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -47,7 +48,7 @@ create_db()
 
 
 def get_db():
-    '''Соединение с БД, если оно еще не установлено'''
+    """Соединение с БД, если оно еще не установлено"""
     if not hasattr(g, 'link_db'):
         g.link_db = connect_db()
     return g.link_db
@@ -66,7 +67,7 @@ def before_request():
 
 @app.teardown_appcontext
 def close_db(error):
-    '''Закрываем соединение с БД, если оно было установлено'''
+    """Закрываем соединение с БД, если оно было установлено"""
     if hasattr(g, 'link_db'):
         g.link_db.close()
 
@@ -79,14 +80,25 @@ def index():
 @app.route("/add_post", methods=["POST", "GET"])
 def addPost():
     if request.method == "POST":
-        if len(request.form['name']) > 4 and len(request.form['post']) > 10:
-            res = dbase.addPost(request.form['name'], request.form['post'], request.form['url'])
+        if len(request.form['post']) > 10 and len(request.form['title']) > 5:
+            flag = True
+            try:
+                map_request = \
+                    (f"http://geocode-maps.yandex.ru/1.x/?apikey=40d1649f-0493-4b70-98ba-98533de7710b&geocode="
+                     f"{request.form['place']}&format=json")
+                response = requests.get(map_request)
+            except:
+                flag = False
+            if flag:
+                res = dbase.addPost(request.form['title'], request.form['post'], request.form['place'])
+            else:
+                res = dbase.addPost(request.form['title'], request.form['post'], 'place')
             if not res:
-                flash('Ошибка добавления статьи', category='error')
+                flash('Ошибка добавления статьи, проверьте правильность заполнения полей', category='error')
             else:
                 flash('Статья добавлена успешно', category='success')
         else:
-            flash('Ошибка добавления статьи', category='error')
+            flash('Ошибка добавления статьи, проверьте правильность заполнения полей', category='error')
 
     return render_template('add_post.html', menu=dbase.getMenu(), title="Добавление статьи")
 
@@ -95,17 +107,29 @@ def addPost():
 @login_required
 def showPost(alias):
     title, post = dbase.getPost(alias)
+    user = current_user
+
+    print(dir(user))
+    place = user.getPlace()
+
     if not title:
         abort(404)
+    if place != 'place':
+        map_request = \
+            (f"http://geocode-maps.yandex.ru/1.x/?apikey=40d1649f-0493-4b70-98ba-98533de7710b&geocode="
+             f"{place}&format=json")
+        response = requests.get(map_request)
+        map_file = "static/img/map.png"
+        with open(map_file, "wb") as file:
+            file.write(response.content)
 
-    return render_template('post.html', menu=dbase.getMenu(), title=title, post=post)
+    return render_template('post.html', menu=dbase.getMenu(), title=title, post=post, place=place)
 
 
 @app.route("/login", methods=["POST", "GET"])
 def login():
     if current_user.is_authenticated:
         return redirect(url_for('profile'))
-
     if request.method == "POST":
         user = dbase.getUserByEmail(request.form['email'])
         if user and check_password_hash(user['psw'], request.form['psw']):
@@ -121,11 +145,17 @@ def login():
 
 @app.route("/register", methods=["POST", "GET"])
 def register():
+    list_need = ['ж', 'м', 'Ж', 'М']
     if request.method == "POST":
-        if len(request.form['name']) > 1 and len(request.form['email']) > 1 \
-                and len(request.form['psw']) > 1 and request.form['psw'] == request.form['psw2']:
+        if (len(request.form['name']) > 1 and len(request.form['email']) > 1
+                and len(request.form['psw']) > 1 and request.form['psw'] == request.form['psw2'] and (
+                        request.form['gender'] in list_need)):
+            if request.form['gender'] == 'м' or request.form['gender'] == 'М':
+                gender1 = True
+            else:
+                gender1 = False
             hash = generate_password_hash(request.form['psw'])
-            res = dbase.addUser(request.form['name'], request.form['email'], hash)
+            res = dbase.addUser(request.form['name'], request.form['email'], hash, request.form['fullname'], gender1)
             if res:
                 flash("Вы успешно зарегистрированы", "success")
                 return redirect(url_for('login'))

@@ -18,8 +18,10 @@
 	<td valign="top" class="profile-panel">
 		<p><a href="{{url_for('logout')}}">Выйти из профиля</a>
 		<ul class="profile-info">
-		<li>Имя: {{ current_user.getName() }}</li>
-		<li>Email: {{ current_user.getEmail() }}</li>
+		<li>Имя на сайте: {{current_user.getName()}}</li>
+		<li>Полное имя: {{current_user.get_fullname()}}</li>
+		<li>Указанный пол: {{current_user.get_gender()}}</li>
+		<li>Email: {{current_user.getEmail()}}</li>
 		</ul>
 	</td></tr>
 </table>
