@@ -21,6 +21,8 @@ CREATE TABLE IF NOT EXISTS users
     avatar BLOB DEFAULT NULL,
     time integer NOT NULL,
     fullname text NOT NULL,
-    gender text NOT NULL,
-    place text NOT NULL
+    gender text NOT NULL
 );
+
+
+

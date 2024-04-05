@@ -1,3 +1,4 @@
+import datetime
 import sqlite3
 import time
 import math
@@ -32,7 +33,8 @@ class FDataBase:
                           "\\g<tag>" + base + "/\\g<url>>",
                           text)
             tm = math.floor(time.time())
-            self.__cur.execute("INSERT INTO posts VALUES(NULL, ?, ?, ?, ?)", (title, text, place, tm))
+            time_str = datetime.datetime.fromtimestamp(tm).strftime('%Y-%m-%d %H:%M:%S')
+            self.__cur.execute("INSERT INTO posts VALUES(NULL, ?, ?, ?, ?, ?)", (title, text, place, tm, time_str))
             self.__db.commit()
         except sqlite3.Error as e:
             print("Ошибка добавления статьи в БД " + str(e))
@@ -41,7 +43,7 @@ class FDataBase:
 
     def getPost(self, alias):
         try:
-            self.__cur.execute(f"SELECT title, text FROM posts WHERE url LIKE '{alias}' LIMIT 1")
+            self.__cur.execute(f"SELECT title, text,place,time FROM posts WHERE url LIKE '{alias}' LIMIT 1")
             res = self.__cur.fetchone()
             if res:
                 return res

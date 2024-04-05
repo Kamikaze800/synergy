@@ -1,3 +1,4 @@
+import datetime
 import sqlite3
 import os
 import requests
@@ -82,6 +83,7 @@ def addPost():
     if request.method == "POST":
         if len(request.form['post']) > 10 and len(request.form['title']) > 5:
             flag = True
+            now = datetime.datetime.now()
             try:
                 map_request = \
                     (f"http://geocode-maps.yandex.ru/1.x/?apikey=40d1649f-0493-4b70-98ba-98533de7710b&geocode="
@@ -106,11 +108,8 @@ def addPost():
 @app.route("/post/<alias>")
 @login_required
 def showPost(alias):
-    title, post = dbase.getPost(alias)
-    user = current_user
+    title, text, place, time= dbase.getPost(alias)
 
-    print(dir(user))
-    place = user.getPlace()
 
     if not title:
         abort(404)
@@ -123,7 +122,7 @@ def showPost(alias):
         with open(map_file, "wb") as file:
             file.write(response.content)
 
-    return render_template('post.html', menu=dbase.getMenu(), title=title, post=post, place=place)
+    return render_template('post.html', menu=dbase.getMenu(), title=title, post=text, place=place, time=time)
 
 
 @app.route("/login", methods=["POST", "GET"])
