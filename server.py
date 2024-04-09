@@ -83,7 +83,6 @@ def addPost():
     if request.method == "POST":
         if len(request.form['post']) > 10 and len(request.form['title']) > 5:
             flag = True
-            now = datetime.datetime.now()
             try:
                 map_request = \
                     (f"http://geocode-maps.yandex.ru/1.x/?apikey=40d1649f-0493-4b70-98ba-98533de7710b&geocode="
@@ -108,8 +107,8 @@ def addPost():
 @app.route("/post/<alias>")
 @login_required
 def showPost(alias):
-    title, text, place, time= dbase.getPost(alias)
-
+    title, text, place, time = dbase.getPost(alias)
+    print(text)
 
     if not title:
         abort(404)
