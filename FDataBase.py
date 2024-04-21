@@ -29,9 +29,9 @@ class FDataBase:
                 print("Статья с таким url уже существует")
                 return False'''
             base = url_for('static', filename='images_html')
-            text = re.sub(r"(?P<tag><img\s+[^>]*src=)(?P<quote>[\"'])(?P<url>.+?)(?P=quote)>",
-                          "\\g<tag>" + base + "/\\g<url>>",
-                          text)
+            # text = re.sub(r"(?P<tag><img\s+[^>]*src=)(?P<quote>[\"'])(?P<url>.+?)(?P=quote)>",
+            #               "\\g<tag>" + base + "/\\g<url>>",
+            #               text)
             tm = math.floor(time.time())
             time_str = datetime.datetime.fromtimestamp(tm).strftime('%Y-%m-%d %H:%M:%S')
             self.__cur.execute("INSERT INTO posts VALUES(NULL, ?, ?, ?, ?, ?)", (title, text, place, tm, time_str))
@@ -55,7 +55,7 @@ class FDataBase:
         try:
             self.__cur.execute(f"SELECT id, title, text, url FROM posts ORDER BY time DESC")
             res = self.__cur.fetchall()
-            print(res)
+
             if res: return res
         except sqlite3.Error as e:
             print("Ошибка получения статьи из БД " + str(e))
@@ -83,7 +83,7 @@ class FDataBase:
             self.__cur.execute(f"SELECT * FROM users WHERE id = {user_id} LIMIT 1")
             res = self.__cur.fetchone()
             res = dict(res)
-            print(res)
+
             if not res:
                 print("Пользователь не найден")
                 return False

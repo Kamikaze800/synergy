@@ -7,6 +7,8 @@ from FDataBase import FDataBase
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import LoginManager, login_user, login_required, logout_user, current_user
 from UserLogin import UserLogin
+from admin.admin import admin
+
 
 # конфигурация
 DATABASE = '/tmp/flsite.db'
@@ -17,6 +19,7 @@ MAX_CONTENT_LENGTH = 1024 * 1024
 app = Flask(__name__)
 app.config.from_object(__name__)
 app.config.update(dict(DATABASE=os.path.join(app.root_path, 'flsite.db')))
+app.register_blueprint(admin, url_prefix='/admin')
 
 login_manager = LoginManager(app)
 login_manager.login_view = 'login'
@@ -81,7 +84,7 @@ def index():
 @app.route("/add_post", methods=["POST", "GET"])
 def addPost():
     if request.method == "POST":
-        if len(request.form['post']) > 10 and len(request.form['title']) > 5:
+        if len(request.form['text']) > 10 and len(request.form['title']) > 5:
             flag = True
             try:
                 map_request = \
@@ -91,9 +94,9 @@ def addPost():
             except:
                 flag = False
             if flag:
-                res = dbase.addPost(request.form['title'], request.form['post'], request.form['place'])
+                res = dbase.addPost(request.form['title'], request.form['text'], request.form['place'])
             else:
-                res = dbase.addPost(request.form['title'], request.form['post'], 'place')
+                res = dbase.addPost(request.form['title'], request.form['text'], 'place')
             if not res:
                 flash('Ошибка добавления статьи, проверьте правильность заполнения полей', category='error')
             else:
@@ -104,11 +107,12 @@ def addPost():
     return render_template('add_post.html', menu=dbase.getMenu(), title="Добавление статьи")
 
 
+
 @app.route("/post/<alias>")
 @login_required
 def showPost(alias):
     title, text, place, time = dbase.getPost(alias)
-    print(text)
+
 
     if not title:
         abort(404)
@@ -120,7 +124,6 @@ def showPost(alias):
         map_file = "static/img/map.png"
         with open(map_file, "wb") as file:
             file.write(response.content)
-
     return render_template('post.html', menu=dbase.getMenu(), title=title, post=text, place=place, time=time)
 
 
@@ -130,6 +133,7 @@ def login():
         return redirect(url_for('profile'))
     if request.method == "POST":
         user = dbase.getUserByEmail(request.form['email'])
+
         if user and check_password_hash(user['psw'], request.form['psw']):
             userlogin = UserLogin().create(user)
             rm = True if request.form.get('remainme') else False
